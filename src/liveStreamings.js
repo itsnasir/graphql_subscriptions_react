@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import LiveStreaming from './liveStreaming'
 import { useQuery, gql } from '@apollo/client';
 
@@ -20,7 +20,12 @@ subscription{
 `
 
 const LiveStreamings=(props) => {
+  const [linksToRender, setLinksToRender] = useState([]);
   const { loading, error, data, subscribeToMore } = useQuery(LIVE_STREAMINGS);
+
+  useEffect(() => {
+    setLinksToRender(data.liveStreamings)
+  },[data])
 
   subscribeToMore({
     document: NEW_LIVE_STREAMINGS,
@@ -39,7 +44,6 @@ const LiveStreamings=(props) => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error :(</p>;
 
-    const linksToRender = data.liveStreamings
     return (
       <div>
         <h3>LiveStreamings</h3>
