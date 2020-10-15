@@ -13,8 +13,10 @@ query{
 const NEW_LIVE_STREAMINGS = gql`
 subscription{
   newStreamingLink {
-    id
-    url
+    liveStreaming {
+      id
+      url
+    }
   }
 }
 `
