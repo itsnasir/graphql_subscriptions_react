@@ -13,7 +13,7 @@ query{
 const NEW_LIVE_STREAMINGS = gql`
 subscription{
   newStreamingLink {
-    liveStreaming {
+    newLiveStreaming {
       id
       url
     }
@@ -26,7 +26,9 @@ const LiveStreamings=(props) => {
   const { loading, error, data, subscribeToMore } = useQuery(LIVE_STREAMINGS);
 
   useEffect(() => {
-    setLinksToRender(data.liveStreamings)
+    if (data) {
+      setLinksToRender(data.liveStreamings)
+    }
   },[data])
 
   subscribeToMore({

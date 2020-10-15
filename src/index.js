@@ -29,7 +29,7 @@ const link = ApolloLink.split(
 )
 
 const client = new ApolloClient({
-  link: httpLink,
+  link: link,
   cache: new InMemoryCache()
 })
 
