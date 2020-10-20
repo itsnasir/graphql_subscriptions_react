@@ -4,46 +4,50 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
-import { createHttpLink } from "apollo-link-http";
+import { createHttpLink } from 'apollo-link-http';
 import { ApolloProvider } from '@apollo/client';
 import ActionCable from 'actioncable';
-import ActionCableLink from 'graphql-ruby-client/dist/subscriptions/ActionCableLink'
-import { ApolloLink } from 'apollo-link'
+import ActionCableLink from 'graphql-ruby-client/dist/subscriptions/ActionCableLink';
+import { ApolloLink } from 'apollo-link';
+import { BrowserRouter } from 'react-router-dom';
 
 const httpLink = createHttpLink({
-  uri: 'https://graphql-subscriptions-api.herokuapp.com//api/v1/graphql'
-})
+  uri: `${process.env.REACT_APP_BASE_URL}/api/v1/graphql`
+});
 
 // const httpLink = createHttpLink({
 //   uri: `http://localhost:3000//api/v1/graphql`
 // })
 
-const cable = ActionCable.createConsumer('wss://graphql-subscriptions-api.herokuapp.com/cable')
+const cable = ActionCable.createConsumer(
+  'wss://graphql-subscriptions-api.herokuapp.com/cable'
+);
 // const cable = ActionCable.createConsumer('ws://localhost:3000/cable')
 
 const hasSubscriptionOperation = ({ query: { definitions } }) => {
   return definitions.some(
-    ({ kind, operation }) => kind === 'OperationDefinition' && operation === 'subscription',
-  )
-}
+    ({ kind, operation }) =>
+      kind === 'OperationDefinition' && operation === 'subscription'
+  );
+};
 
 const link = ApolloLink.split(
   hasSubscriptionOperation,
-  new ActionCableLink({cable}),
+  new ActionCableLink({ cable }),
   httpLink
-)
+);
 
 const client = new ApolloClient({
   link: link,
   cache: new InMemoryCache()
-})
+});
 
 ReactDOM.render(
-  <React.StrictMode>
-    <ApolloProvider client={client}>
+  <ApolloProvider client={client}>
+    <BrowserRouter>
       <App />
-    </ApolloProvider>
-  </React.StrictMode>,
+    </BrowserRouter>
+  </ApolloProvider>,
   document.getElementById('root')
 );
 

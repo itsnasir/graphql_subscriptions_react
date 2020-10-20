@@ -1,50 +1,53 @@
 import React, { useEffect, useState } from 'react';
-import LiveStreaming from './liveStreaming'
+import LiveStreaming from './liveStreaming';
 import { useQuery, gql } from '@apollo/client';
 
 const LIVE_STREAMINGS = gql`
-query{
-  liveStreamings {
-    id
-    url
-  }
-}
-`
-const NEW_LIVE_STREAMINGS = gql`
-subscription{
-  newStreamingLink {
-    newLiveStreaming {
+  query {
+    liveStreamings {
       id
       url
     }
   }
-}
-`
+`;
+const NEW_LIVE_STREAMINGS = gql`
+  subscription {
+    newStreamingLink {
+      newLiveStreaming {
+        id
+        url
+      }
+    }
+  }
+`;
 
-const LiveStreamings=(props) => {
+const LiveStreamings = props => {
   const [linksToRender, setLinksToRender] = useState([]);
   const { loading, error, data, subscribeToMore } = useQuery(LIVE_STREAMINGS);
 
   useEffect(() => {
     if (data) {
-      setLinksToRender(data.liveStreamings)
+      setLinksToRender(data.liveStreamings);
     }
-  },[data])
+  }, [data]);
 
   subscribeToMore({
     document: NEW_LIVE_STREAMINGS,
     updateQuery(prev, { subscriptionData }) {
-      console.log("ss =>", subscriptionData)
-       if (!subscriptionData.data) return prev
-       console.log("ss =>", subscriptionData.data)
+      console.log('ss =>', subscriptionData);
+      if (!subscriptionData.data) return prev;
+      console.log('ss =>', subscriptionData.data);
 
-       return {
-         liveStreamings: [...prev.liveStreamings, subscriptionData.data.newStreamingLink]
-       }
+      return {
+        liveStreamings: [
+          ...prev.liveStreamings,
+          subscriptionData.data.newStreamingLink
+        ]
+      };
     }
   });
 
-  const getLiveStreamings=() => {
+  const getLiveStreamings = () => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error :(</p>;
 
@@ -52,14 +55,14 @@ const LiveStreamings=(props) => {
       <div>
         <h3>LiveStreamings</h3>
         <div>
-          {linksToRender.map(link => <LiveStreaming key={link.id} link={link} />)}
+          {linksToRender.map(link => (
+            <LiveStreaming key={link.id} link={link} {...props} />
+          ))}
         </div>
       </div>
     );
-  }
-  return (
-    <>{getLiveStreamings()}</>
-  );
-}
+  };
+  return <>{getLiveStreamings()}</>;
+};
 
-export default LiveStreamings
+export default LiveStreamings;
