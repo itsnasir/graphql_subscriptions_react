@@ -22,8 +22,8 @@ const NEW_LIVE_STREAMINGS = gql`
 `;
 
 const SUBSCRIBE_TO_INTERACTION = gql`
-  subscription($liveStreamingId: ID!) {
-    newLiveInteractionPosted(liveStreamingId: $liveStreamingId) {
+  subscription($liveStreamingUuid: ID!) {
+    newLiveInteractionPosted(liveStreamingUuid: $liveStreamingUuid) {
       newLiveInteraction {
         interactionType
         liveStreaming {
@@ -33,6 +33,14 @@ const SUBSCRIBE_TO_INTERACTION = gql`
         text
         user {
           fullName
+            appRole
+            banned
+            bio
+            eventUrl
+            firstName
+            lastName
+            merchandiseUrl
+            largeAvatarUrl
         }
       }
     }
@@ -61,15 +69,15 @@ const LiveStreamings = (props) => {
   //   variables: {uuid: '1dc29b3b-f89c-4cc2-a31a-0041019816e9'},
   // });
 
-  
+
   const { data, error, loading } = useSubscription(SUBSCRIBE_TO_INTERACTION, {
     variables: {
-      liveStreamingId: "1dc29b3b-f89c-4cc2-a31a-0041019816e9",
+      liveStreamingUuid: "1dc29b3b-f89c-4cc2-a31a-0041019816e9",
     },
     // shouldResubscribe: true,
     // skip: !recording,
   });
-  
+
   useEffect(() => {
     console.log(data);
     // if (data) {
