@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import LiveStreaming from './liveStreaming';
-import { useQuery, gql } from '@apollo/client';
+import React, { useEffect, useState } from "react";
+import LiveStreaming from "./liveStreaming";
+import { useQuery, gql, useSubscription } from "@apollo/client";
 
 const LIVE_STREAMINGS = gql`
   query {
@@ -21,31 +21,77 @@ const NEW_LIVE_STREAMINGS = gql`
   }
 `;
 
-const LiveStreamings = props => {
-  const [linksToRender, setLinksToRender] = useState([]);
-  const { loading, error, data, subscribeToMore } = useQuery(LIVE_STREAMINGS);
-
-  useEffect(() => {
-    if (data) {
-      setLinksToRender(data.liveStreamings);
+const SUBSCRIBE_TO_INTERACTION = gql`
+  subscription($liveStreamingId: ID!) {
+    newLiveInteractionPosted(liveStreamingId: $liveStreamingId) {
+      newLiveInteraction {
+        interactionType
+        liveStreaming {
+          paid
+        }
+        seconds
+        text
+        user {
+          fullName
+        }
+      }
     }
+  }
+`;
+
+const GET_LIVE_STREAM = gql`
+  query($uuid: ID!) {
+    liveStreaming(uuid: $uuid) {
+      liveInteractions {
+        nodes {
+          interactionType
+          text
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+    }
+  }
+`;
+
+const LiveStreamings = (props) => {
+  const [linksToRender, setLinksToRender] = useState([]);
+  // const { loading, error, data, subscribeToMore } = useQuery(GET_LIVE_STREAM, {
+  //   variables: {uuid: '1dc29b3b-f89c-4cc2-a31a-0041019816e9'},
+  // });
+
+  
+  const { data, error, loading } = useSubscription(SUBSCRIBE_TO_INTERACTION, {
+    variables: {
+      liveStreamingId: "1dc29b3b-f89c-4cc2-a31a-0041019816e9",
+    },
+    // shouldResubscribe: true,
+    // skip: !recording,
+  });
+  
+  useEffect(() => {
+    console.log(data);
+    // if (data) {
+    //   setLinksToRender(data.liveStreamings);
+    // }
   }, [data]);
 
-  subscribeToMore({
-    document: NEW_LIVE_STREAMINGS,
-    updateQuery(prev, { subscriptionData }) {
-      console.log('ss =>', subscriptionData);
-      if (!subscriptionData.data) return prev;
-      console.log('ss =>', subscriptionData.data);
+  // subscribeToMore({
+  //   document: SUBSCRIBE_TO_INTERACTION,
+  //   updateQuery(prev, { subscriptionData }) {
+  //     console.log("ss =>", subscriptionData);
+  //     if (!subscriptionData.data) return prev;
+  //     console.log("ss =>", subscriptionData.data);
 
-      return {
-        liveStreamings: [
-          ...prev.liveStreamings,
-          subscriptionData.data.newStreamingLink
-        ]
-      };
-    }
-  });
+  //     return {
+  //       liveStreamings: [
+  //         ...prev.liveStreamings,
+  //         subscriptionData.data.newStreamingLink,
+  //       ],
+  //     };
+  //   },
+  // });
 
   const getLiveStreamings = () => {
     if (loading) return <p>Loading...</p>;
@@ -55,7 +101,7 @@ const LiveStreamings = props => {
       <div>
         <h3>LiveStreamings</h3>
         <div>
-          {linksToRender.map(link => (
+          {linksToRender.map((link) => (
             <LiveStreaming key={link.id} link={link} {...props} />
           ))}
         </div>
