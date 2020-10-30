@@ -19,7 +19,7 @@ const httpLink = createHttpLink({
 //   uri: `http://localhost:3000/api/v1/graphql`
 // })
 
-const cable = ActionCable.createConsumer('wss://holr-api.dev.geno.me/cable');
+const cable = ActionCable.createConsumer('wss://holr-api.dev.geno.me/cable?uid=cesar@geno.me');
 // const cable = ActionCable.createConsumer('ws://localhost:3000/cable')
 
 const hasSubscriptionOperation = ({ query: { definitions } }) => {
